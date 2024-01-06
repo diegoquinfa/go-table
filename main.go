@@ -7,21 +7,15 @@ type table struct {
 }
 
 type row struct {
-	Columns []*column
-}
-
-type column struct {
-	Content any
+	Columns any
 }
 
 func main() {
 
 	tb := NewTable(
-		NewRow(NewColumn("")),
-		NewRow(NewColumn("")),
+		NewRow("", ""),
+		NewRow(""),
 	)
-
-	NewRow(NewColumn(""))
 
 	fmt.Println(tb)
 
@@ -38,14 +32,9 @@ func NewTable(rows ...*row) *table {
 	}
 }
 
-func NewRow(columns ...*column) *row {
+func NewRow(columns ...any) *row {
+
 	return &row{
 		Columns: columns,
-	}
-}
-
-func NewColumn(content any) *column {
-	return &column{
-		Content: content,
 	}
 }
