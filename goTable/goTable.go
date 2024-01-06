@@ -6,21 +6,21 @@ import (
 )
 
 const (
-	ESQUINA_INF_DER = "┘"
-	ESQUINA_INF_IZQ = "└"
+	BottomRightCorner = "┘"
+	BottomLeftCorner  = "└"
 
-	ESQUINA_SUP_DER = "┐"
-	ESQUINA_SUP_IZQ = "┌"
+	TopRightCorner = "┐"
+	TopLeftCorner  = "┌"
 
-	PARED_HORIZONTAL = "─"
-	PARED_VERTICAL   = "│"
+	HorizontalWall = "─"
+	VerticalWall   = "│"
 
-	INTERSECCION_DER = "┤"
-	INTERSECCION_IZQ = "├"
+	RightIntersection = "┤"
+	LeftIntersection  = "├"
 
-	INTERSECCION_SUP = "┬"
-	INTERSECCION_MED = "┼"
-	INTERSECCION_INF = "┴"
+	TopIntersection    = "┬"
+	MiddleIntersection = "┼"
+	BottomIntersection = "┴"
 )
 
 type Row struct {
@@ -49,77 +49,77 @@ func CreateTable(rows []Row) {
 
 	maxWidths := GetMaxWidthColumns(rows)
 
-	fmt.Print(ESQUINA_SUP_IZQ)
+	fmt.Print(TopLeftCorner)
 
 	for i, width := range maxWidths {
 		for i := 0; i < width+2; i++ {
-			fmt.Print(PARED_HORIZONTAL)
+			fmt.Print(HorizontalWall)
 		}
 		if i != len(maxWidths)-1 {
-			fmt.Print(INTERSECCION_SUP)
+			fmt.Print(TopIntersection)
 		}
 	}
 
-	fmt.Println(ESQUINA_SUP_DER)
+	fmt.Println(TopRightCorner)
 
 	for i, row := range rows {
 		if i == 0 {
 			for j, column := range row.Columns {
 				text := fmt.Sprintf("%v", column)
 				len := maxWidths[j] - row.maxLenColumn[j]
-				fmt.Printf("%s %s", PARED_VERTICAL, text)
+				fmt.Printf("%s %s", VerticalWall, text)
 				for k := 0; k < len+1; k++ {
 					fmt.Print(" ")
 				}
 			}
-			fmt.Println(PARED_VERTICAL)
+			fmt.Println(VerticalWall)
 
-			fmt.Print(INTERSECCION_IZQ)
+			fmt.Print(LeftIntersection)
 			for j, width := range maxWidths {
 				for k := 0; k < width+2; k++ {
-					fmt.Print(PARED_HORIZONTAL)
+					fmt.Print(HorizontalWall)
 				}
 				if j != len(maxWidths)-1 {
-					fmt.Print(INTERSECCION_MED)
+					fmt.Print(MiddleIntersection)
 				}
 			}
-			fmt.Println(INTERSECCION_DER)
+			fmt.Println(RightIntersection)
 			continue
 		}
 
 		for j, column := range row.Columns {
 			text := fmt.Sprintf("%v", column)
 			spaces := maxWidths[j] - row.maxLenColumn[j]
-			fmt.Printf("%s %s", PARED_VERTICAL, text)
+			fmt.Printf("%s %s", VerticalWall, text)
 			for k := 0; k < spaces+1; k++ {
 				fmt.Print(" ")
 			}
 		}
-		fmt.Println(PARED_VERTICAL)
+		fmt.Println(VerticalWall)
 
 		if i != len(rows)-1 {
 			for j := range row.Columns {
-				fmt.Printf("%s", PARED_VERTICAL)
+				fmt.Printf("%s", VerticalWall)
 				spaces := maxWidths[j]
 				for k := 0; k < spaces+2; k++ {
 					fmt.Print(" ")
 				}
 			}
 
-			fmt.Println(PARED_VERTICAL)
+			fmt.Println(VerticalWall)
 		}
 	}
 
-	fmt.Print(ESQUINA_INF_IZQ)
+	fmt.Print(BottomLeftCorner)
 	for i, width := range maxWidths {
 		for i := 0; i < width+2; i++ {
-			fmt.Print(PARED_HORIZONTAL)
+			fmt.Print(HorizontalWall)
 		}
 		if i != len(maxWidths)-1 {
-			fmt.Print(INTERSECCION_INF)
+			fmt.Print(BottomIntersection)
 		}
 	}
-	println(ESQUINA_INF_DER)
+	println(BottomRightCorner)
 }
 
 func NewRow(columns ...any) *Row {
