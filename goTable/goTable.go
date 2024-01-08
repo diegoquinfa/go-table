@@ -5,136 +5,113 @@ import (
 	"strings"
 )
 
-const (
-	BottomRightCorner = "┘"
-	BottomLeftCorner  = "└"
+func NewTable(rows ...*row) (*table, error) {
+	if rows == nil {
+		return nil, fmt.Errorf("rows are empty")
+	}
 
-	TopRightCorner = "┐"
-	TopLeftCorner  = "┌"
-
-	HorizontalWall = "─"
-	VerticalWall   = "│"
-
-	RightIntersection = "┤"
-	LeftIntersection  = "├"
-
-	TopIntersection    = "┬"
-	MiddleIntersection = "┼"
-	BottomIntersection = "┴"
-)
-
-type Row struct {
-	Columns      []any
-	maxLenColumn []int
+	return &table{
+		Rows:            rows,
+		MaxWidthColumns: GetMaxWidthColumns(rows),
+	}, nil
 }
 
-func GetMaxWidthColumns(rows []Row) []int {
-	maxWidths := make([]int, len(rows[0].maxLenColumn))
+func GetMaxWidthColumns(rows []*row) []uint8 {
+
+	var maxNumColumns uint8
 
 	for _, row := range rows {
-		for j, len := range row.maxLenColumn {
-			if maxWidths[j] < len {
-				maxWidths[j] = len
+		if row.NumColumns > maxNumColumns {
+			maxNumColumns = row.NumColumns
+		}
+	}
+
+	maxWidths := make([]uint8, maxNumColumns)
+	for _, row := range rows {
+		for j, col := range row.Columns {
+			if col.Width > maxWidths[j] {
+				maxWidths[j] = col.Width
 			}
 		}
 	}
+
+	fmt.Println(maxWidths)
 
 	return maxWidths
 }
 
-func CreateTable(rows []Row) {
-	if len(rows) == 0 {
-		return
+func NewRow(columnsText ...string) *row {
+	cols := make([]*column, 0, len(columnsText))
+
+	for _, text := range columnsText {
+		cols = append(cols, NewColumn(text))
 	}
 
-	maxWidths := GetMaxWidthColumns(rows)
-
-	fmt.Print(TopLeftCorner)
-
-	for i, width := range maxWidths {
-		for i := 0; i < width+2; i++ {
-			fmt.Print(HorizontalWall)
-		}
-		if i != len(maxWidths)-1 {
-			fmt.Print(TopIntersection)
-		}
+	return &row{
+		Columns:    cols,
+		NumColumns: uint8(len(cols)),
+		MaxHeight:  getMaxHeighRow(cols),
 	}
-
-	fmt.Println(TopRightCorner)
-
-	for i, row := range rows {
-		if i == 0 {
-			for j, column := range row.Columns {
-				text := fmt.Sprintf("%v", column)
-				len := maxWidths[j] - row.maxLenColumn[j]
-				fmt.Printf("%s %s", VerticalWall, text)
-				for k := 0; k < len+1; k++ {
-					fmt.Print(" ")
-				}
-			}
-			fmt.Println(VerticalWall)
-
-			fmt.Print(LeftIntersection)
-			for j, width := range maxWidths {
-				for k := 0; k < width+2; k++ {
-					fmt.Print(HorizontalWall)
-				}
-				if j != len(maxWidths)-1 {
-					fmt.Print(MiddleIntersection)
-				}
-			}
-			fmt.Println(RightIntersection)
-			continue
-		}
-
-		for j, column := range row.Columns {
-			text := fmt.Sprintf("%v", column)
-			spaces := maxWidths[j] - row.maxLenColumn[j]
-			fmt.Printf("%s %s", VerticalWall, text)
-			for k := 0; k < spaces+1; k++ {
-				fmt.Print(" ")
-			}
-		}
-		fmt.Println(VerticalWall)
-
-		if i != len(rows)-1 {
-			for j := range row.Columns {
-				fmt.Printf("%s", VerticalWall)
-				spaces := maxWidths[j]
-				for k := 0; k < spaces+2; k++ {
-					fmt.Print(" ")
-				}
-			}
-
-			fmt.Println(VerticalWall)
-		}
-	}
-
-	fmt.Print(BottomLeftCorner)
-	for i, width := range maxWidths {
-		for i := 0; i < width+2; i++ {
-			fmt.Print(HorizontalWall)
-		}
-		if i != len(maxWidths)-1 {
-			fmt.Print(BottomIntersection)
-		}
-	}
-	println(BottomRightCorner)
 }
 
-func NewRow(columns ...any) *Row {
-	row := Row{}
+func getMaxHeighRow(columns []*column) uint8 {
+	var maxHeight uint8
 
-	row.Columns = append(row.Columns, columns...)
-
-	for i := range row.Columns {
-		text := fmt.Sprintf("%v", columns[i])
-		lenText := len([]rune(text))
-		if strings.Contains(text, "\x1b[31m") || strings.Contains(text, "\x1b[32m") {
-			lenText -= 9
+	for _, col := range columns {
+		if col.Height > maxHeight {
+			maxHeight = col.Height
 		}
-		row.maxLenColumn = append(row.maxLenColumn, lenText)
 	}
 
-	return &row
+	return maxHeight
+}
+
+func NewColumn(text string) *column {
+	content := columnSplit(text)
+	width := maxWidthColumn(content)
+	height := len(content)
+
+	return &column{
+		Content: content,
+		Width:   width,
+		Height:  uint8(height),
+	}
+}
+
+func columnSplit(text string) []string {
+	splitedText := strings.Split(text, " ")
+
+	content := make([]string, 0)
+
+	var n, i uint16
+	for int(i) < len(splitedText) {
+
+		if n == 5 {
+			content = append(content, strings.Join(splitedText[i-n:i], " "))
+			n = 0
+		}
+
+		i++
+		n++
+	}
+
+	// Agregar las palabras restantes
+	if n > 0 {
+		content = append(content, strings.Join(splitedText[i-n:], " "))
+	}
+
+	return content
+}
+
+func maxWidthColumn(content []string) uint8 {
+	var maxWidth int
+
+	for _, v := range content {
+		width := len([]rune(v))
+		if width > maxWidth {
+			maxWidth = width
+		}
+	}
+
+	return uint8(maxWidth)
 }
