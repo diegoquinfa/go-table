@@ -1,4 +1,4 @@
-package table
+package goTable
 
 func NewRow(columnsText ...string) *row {
 	cols := make([]*column, 0, len(columnsText))

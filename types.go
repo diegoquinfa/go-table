@@ -1,4 +1,4 @@
-package table
+package goTable
 
 type table struct {
 	Rows            []*row
