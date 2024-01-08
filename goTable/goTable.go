@@ -3,6 +3,7 @@ package goTable
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 func NewTable(rows ...*row) (*table, error) {
@@ -82,20 +83,15 @@ func columnSplit(text string, maxSize uint8) []string {
 	words := strings.Split(text, " ")
 
 	var content []string
+	var lineContent []string
 
-	var size, i uint8
-	for int(i) < len(words) {
-		if size == maxSize {
-			content = append(content, strings.Join(words[i-size:i], " "))
-			size = 0
+	for i, word := range words {
+		lineContent = append(lineContent, word)
+
+		if len(lineContent) == int(maxSize) || i == len(words)-1 {
+			content = append(content, strings.Join(lineContent, " "))
+			lineContent = []string{}
 		}
-
-		i++
-		size++
-	}
-
-	if size > 0 {
-		content = append(content, strings.Join(words[i-size:], " "))
 	}
 
 	return content
@@ -104,8 +100,8 @@ func columnSplit(text string, maxSize uint8) []string {
 func maxWidthColumn(content []string) uint8 {
 	var maxWidth int
 
-	for _, v := range content {
-		width := len([]rune(v))
+	for _, line := range content {
+		width := utf8.RuneCountInString(line)
 		if width > maxWidth {
 			maxWidth = width
 		}
