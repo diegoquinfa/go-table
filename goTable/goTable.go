@@ -67,7 +67,7 @@ func getMaxHeighRow(columns []*column) uint8 {
 }
 
 func NewColumn(text string) *column {
-	content := columnSplit(text)
+	content := columnSplit(text, 4)
 	width := maxWidthColumn(content)
 	height := len(content)
 
@@ -78,26 +78,24 @@ func NewColumn(text string) *column {
 	}
 }
 
-func columnSplit(text string) []string {
-	splitedText := strings.Split(text, " ")
+func columnSplit(text string, maxSize uint8) []string {
+	words := strings.Split(text, " ")
 
-	content := make([]string, 0)
+	var content []string
 
-	var n, i uint16
-	for int(i) < len(splitedText) {
-
-		if n == 5 {
-			content = append(content, strings.Join(splitedText[i-n:i], " "))
-			n = 0
+	var size, i uint8
+	for int(i) < len(words) {
+		if size == maxSize {
+			content = append(content, strings.Join(words[i-size:i], " "))
+			size = 0
 		}
 
 		i++
-		n++
+		size++
 	}
 
-	// Agregar las palabras restantes
-	if n > 0 {
-		content = append(content, strings.Join(splitedText[i-n:], " "))
+	if size > 0 {
+		content = append(content, strings.Join(words[i-size:], " "))
 	}
 
 	return content
