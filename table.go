@@ -1,4 +1,4 @@
-package goTable
+package table
 
 import (
 	"fmt"
